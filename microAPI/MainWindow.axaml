@@ -1,0 +1,92 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:microAPI.ViewModels"
+        xmlns:local="using:microAPI"
+        x:Class="microAPI.MainWindow"
+        x:CompileBindings="False"
+        mc:Ignorable="d"
+        Title="Micro API"
+        Background="white"
+        Height="600"
+        Width="900"
+        WindowState="Normal">
+
+    
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Barra superior: Método HTTP, URL e Botão de Enviar -->
+        <Grid Grid.Row="0"
+                Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <ComboBox Grid.Column="0"
+                      ItemsSource="{Binding HttpMethods}"
+                      SelectedItem="{Binding SelectedMethod}"
+                      HorizontalAlignment="Stretch"
+                      Margin="0,0,8,0"/>
+
+            <TextBox Grid.Column="1"
+                     Text="{Binding Url}"
+                     PlaceholderText="URL da Requisição"
+                     Margin="0,0,8,0"/>
+
+            <Button Grid.Column="2"
+                    Command="{Binding ExecuteRequestCommand}"
+                    Content="Enviar"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    IsEnabled="{Binding !IsLoading}"/>
+        </Grid>
+
+        <!-- Request Body -->
+        <HeaderedContentControl Grid.Row="1"
+                Header="Request Body (JSON)"
+                Margin="0,0,0,8">
+            <TextBox Text="{Binding RequestBody}"
+                     AcceptsReturn="True"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     VerticalContentAlignment="Top"
+                     MinHeight="100"/>
+        </HeaderedContentControl>
+
+        <!-- Status e Indicador de Progresso -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Margin="0,10">
+            <TextBlock Text="Status: "
+                    FontWeight="Bold"/>
+            <TextBlock Text="{Binding StatusCode}"
+                    Foreground="DarkCyan"/>
+            <!-- No Avalonia, IsVisible aceita propriedades booleanas diretamente -->
+            <ProgressBar
+                IsIndeterminate="True"
+                IsVisible="{Binding IsLoading}"
+                Margin="10,0,0,0"
+                    Height="4"
+                    Width="100"/>
+        </StackPanel>
+
+        <!-- Response Body -->
+        <HeaderedContentControl Grid.Row="3"
+                Header="Response">
+            <TextBox Text="{Binding ResponseBody}"
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     VerticalContentAlignment="Top"/>
+        </HeaderedContentControl>
+    </Grid>
+</Window>

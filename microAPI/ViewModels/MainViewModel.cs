@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Windows;
 
-namespace ClientAPI.ViewModels;
+namespace microAPI.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
@@ -57,7 +57,7 @@ public partial class MainViewModel : ObservableObject
             }
 
             // Exemplo de Header fixo (em app real, seria uma lista dinâmica)
-            requestMessage.Headers.Add("User-Agent", "ClientAPI-WPF");
+            requestMessage.Headers.Add("User-Agent", "microAPI-WPF");
 
             // 4. Execução
             var response = await client.SendAsync(requestMessage);
