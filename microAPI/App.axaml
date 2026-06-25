@@ -1,7 +1,14 @@
 ﻿<Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:microAPI"
              x:Class="microAPI.App"
-             RequestedThemeVariant="Default">
+             xmlns:converters="using:microAPI.Converters"
+             RequestedThemeVariant="Light"
+             >
+    <Application.Resources>
+            <converters:StatusToIconConverter x:Key="StatusToIconConverter"/>
+            <converters:MethodToColorConverter x:Key="MethodToColorConverter"/>
+        </Application.Resources>
     <Application.Styles>
         <FluentTheme/>
     </Application.Styles>
