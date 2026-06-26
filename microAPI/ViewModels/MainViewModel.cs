@@ -1,20 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
-using System.Windows;
-using System.Threading;
-using System.Threading.Tasks;
-
+using microAPI.Models;
+using microAPI.Interfaces;
+using microAPI.Repositories;
 namespace microAPI.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
     private readonly IHttpClientFactory _httpClientFactory;
-
+    private readonly ICollectionRepository _collectionRepository;
     private readonly CancellationTokenSource _cts = new();
 
     // Propriedades observáveis (O Toolkit gera o código boilerplate INotifyPropertyChanged automaticamente)
@@ -30,17 +27,23 @@ public partial class MainViewModel : ObservableObject
     // Lista de verbos HTTP para o ComboBox
     public List<string> HttpMethods { get; } = ["GET", "POST", "PUT", "DELETE"];
 
-    public ObservableCollection<CollectionViewModel> Collections {get; } = new();
+    public ObservableCollection<CollectionViewModel> Collections { get; } = new();
 
-    public MainViewModel (IHttpClientFactory httpClientFactory)
+    public MainViewModel(IHttpClientFactory httpClientFactory, ICollectionRepository collectionRepository)
     {
         _httpClientFactory = httpClientFactory;
+        _collectionRepository = collectionRepository;
         // inicia a verificação periódica de internet em segundo plano
         _ = StartInternetCheckLoopAsync(_cts.Token);
+
+        // carrega as coleções salvas anteriormente
+        _ = LoadCollectionsAsync();
     }
 
+
+
     [RelayCommand]
-    private async Task ExecuteRequestAsync ()
+    private async Task ExecuteRequestAsync()
     {
         // 1. Validação Básica
         if (string.IsNullOrWhiteSpace(Url) || !Uri.TryCreate(Url, UriKind.Absolute, out _))
@@ -99,13 +102,80 @@ public partial class MainViewModel : ObservableObject
     {
         IsSidebarOpen = !IsSidebarOpen;
     }
+    private async Task LoadCollectionsAsync()
+    {
+        var savedCollections = await _collectionRepository.LoadCollectionsAsync();
+
+        foreach (var colModel in savedCollections)
+        {
+            var colVm = new CollectionViewModel(SaveCollectionsCallback)
+            {
+                Name = colModel.Name,
+                IsEditingName = false,
+                IsExpanded = false
+            };
+
+            foreach (var reqModel in colModel.Requests)
+            {
+                var reqVm = new RequestViewModel(SaveCollectionsCallback)
+                {
+                    Name = reqModel.Name,
+                    Method = reqModel.Method,
+                    Url = reqModel.Url,
+                    RequestBody = reqModel.RequestBody,
+                    ResponseBody = reqModel.ResponseBody,
+                    StatusCode = reqModel.StatusCode,
+                    IsEditingName = false
+                };
+                colVm.Requests.Add(reqVm);
+            }
+
+            Collections.Add(colVm);
+        }
+    }
+    private void SaveCollectionsCallback()
+    {
+        _ = SaveCollectionsAsync();
+    }
+    // Traduz a estrutura da UI de volta em Models puros e salva no JSON
+    private async Task SaveCollectionsAsync()
+    {
+        var list = new List<CollectionModel>();
+
+        foreach (var colVm in Collections)
+        {
+            var colModel = new CollectionModel
+            {
+                Name = colVm.Name
+            };
+
+            foreach (var reqVm in colVm.Requests)
+            {
+                colModel.Requests.Add(new RequestModel
+                {
+                    Name = reqVm.Name,
+                    Method = reqVm.Method,
+                    Url = reqVm.Url,
+                    RequestBody = reqVm.RequestBody,
+                    ResponseBody = reqVm.ResponseBody,
+                    StatusCode = reqVm.StatusCode,
+                });
+            }
+
+            list.Add(colModel);
+        }
+        await _collectionRepository.SaveCollectionsAsync(list);
+    }
+
     [RelayCommand]
     private void AddNewCollection()
     {
-        var newCollection = new CollectionViewModel();
+        var newCollection = new CollectionViewModel(SaveCollectionsCallback);
         Collections.Add(newCollection);
+        // Salva que uma nova coleção foi adicionada (embora vazia/em edição)
+        SaveCollectionsCallback();
     }
-    private string TryFormatJson (string json)
+    private string TryFormatJson(string json)
     {
         try
         {
@@ -125,7 +195,7 @@ public partial class MainViewModel : ObservableObject
         // faz checagem inicial imediata
         IsOnline = await CheckInternetConnectionAsync();
 
-        while(await timer.WaitForNextTickAsync(cancellationToken))
+        while (await timer.WaitForNextTickAsync(cancellationToken))
         {
             IsOnline = await CheckInternetConnectionAsync();
         }
