@@ -4,6 +4,9 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using microAPI.ViewModels;
+using microAPI.Interfaces;
+using microAPI.Repositories;
+
 
 namespace microAPI
 {
@@ -25,6 +28,10 @@ namespace microAPI
                 .ConfigureServices((context, services) =>
                 {
                     services.AddHttpClient();
+                    
+                    // Interfaces & Repositories
+                    services.AddSingleton<ICollectionRepository, CollectionRepository>();
+                    
                     services.AddSingleton<MainWindow>();
                     services.AddSingleton<MainViewModel>();
                 })
