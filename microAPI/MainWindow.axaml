@@ -2,11 +2,11 @@
     x:Class="microAPI.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:microAPI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:microAPI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:microAPI.ViewModels"
-    xmlns:converters="using:microAPI.Converters"
     Title="Micro API"
     Width="1000"
     Height="600"
@@ -43,14 +43,109 @@
                     HorizontalContentAlignment="Center"
                     Command="{Binding AddNewCollectionCommand}"
                     Content="+ Nova Coleção" />
-                <!--  Lista de Coleções  -->
-                <TextBlock
-                    Grid.Row="1"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="12"
-                    Foreground="Gray"
-                    Text="Nenhuma coleção criada" />
+                <ScrollViewer Grid.Row="1" Margin="4,0">
+                    <ItemsControl ItemsSource="{Binding Collections}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,4">
+                                    <!--  Cabeçalho da coleção  -->
+                                    <Grid Margin="8,4" ColumnDefinitions="Auto, *, Auto">
+                                        <!--  Cabeçalho da coleção  -->
+                                        <Button Grid.Column="0"
+                                                    Command="{Binding ToggleExpandCommand}"
+                                                    Content="{Binding Arrow}"
+                                                    FontSize="10"
+                                                    Padding="4,2"
+                                                    Background="Transparent"
+                                                    BorderThickness="0" />                                               
+                                            
+                                        <Panel
+                                            Grid.Column="1"
+                                            Margin="8,0"
+                                            VerticalAlignment="Center">
+                                            <!--  Modo Leitura (Clique duplo ativa edição)  -->
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                DoubleTapped="TextBlock_DoubleTapped"
+                                                FontWeight="SemiBold"
+                                                IsVisible="{Binding !IsEditingName}"
+                                                Text="{Binding Name}" />
+                                            <!--  Modo Escrita  -->
+                                            <TextBox
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding IsEditingName}"
+                                                KeyDown="TextBox_KeyDown"
+                                                LostFocus="TextBox_LostFocus"
+                                                PlaceholderText="Nova Coleção"
+                                                Text="{Binding Name}" />
+                                        </Panel>
+                                        <!--  Botão + para adicionar requisição  -->
+                                        <Button
+                                            Grid.Column="2"
+                                            Padding="6,2"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Command="{Binding AddRequestCommand}"
+                                            Content="+" />
+                                    </Grid>
+                                    <!--  2. Lista de Requisições da Coleção (Oculta se !IsExpanded)  -->
+                                    <ItemsControl
+                                        Margin="20,0,0,0"
+                                        IsVisible="{Binding IsExpanded}"
+                                        ItemsSource="{Binding Requests}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="8,2" ColumnDefinitions="Auto, Auto, *, Auto">
+                                                    <ComboBox
+                                                        Grid.Column="0"
+                                                        Margin="0,0,4,0"
+                                                        Padding="4,2"
+                                                        FontSize="10"
+                                                        IsVisible="{Binding IsEditingName}"
+                                                        ItemsSource="{Binding HttpMethods}"
+                                                        SelectedItem="{Binding Method}" />
+                                                    <Border
+                                                        Padding="4,1"
+                                                        VerticalAlignment="Center"
+                                                        Background="{Binding Method, Converter={StaticResource MethodToColorConverter}}"
+                                                        CornerRadius="3"
+                                                        Grid.Column="1"
+                                                        IsVisible="{Binding !IsEditingName}">
+                                                        <TextBlock
+                                                            FontSize="9"
+                                                            FontWeight="Bold"
+                                                            Foreground="White"
+                                                            Text="{Binding Method}" />
+                                                    </Border>
+                                                    <Panel
+                                                        Grid.Column="2"
+                                                        Margin="8,0"
+                                                        VerticalAlignment="Center">
+                                                        <TextBlock
+                                                            VerticalAlignment="Center"
+                                                            DoubleTapped="TextBlock_DoubleTapped"
+                                                            FontSize="12"
+                                                            IsVisible="{Binding !IsEditingName}"
+                                                            Text="{Binding Name}" />
+
+                                                        <TextBox
+                                                            VerticalAlignment="Center"
+                                                            FontSize="12"
+                                                            IsVisible="{Binding IsEditingName}"
+                                                            KeyDown="TextBox_KeyDown"
+                                                            LostFocus="TextBox_LostFocus"
+                                                             PlaceholderText="Nova Requisição"
+                                                            Text="{Binding Name}" />
+                                                    </Panel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </Grid>
         </Border>
         <!--  ========================CONTEÚDO PRINCIPAL========================  -->

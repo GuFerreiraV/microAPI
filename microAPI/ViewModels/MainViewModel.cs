@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
@@ -24,11 +25,12 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private bool _isOnline = true;
     [ObservableProperty] private bool _isSidebarOpen = true;
+    [ObservableProperty] private string _selectedMethod = "GET";
 
     // Lista de verbos HTTP para o ComboBox
     public List<string> HttpMethods { get; } = ["GET", "POST", "PUT", "DELETE"];
 
-    [ObservableProperty] private string _selectedMethod = "GET";
+    public ObservableCollection<CollectionViewModel> Collections {get; } = new();
 
     public MainViewModel (IHttpClientFactory httpClientFactory)
     {
@@ -90,7 +92,7 @@ public partial class MainViewModel : ObservableObject
             IsLoading = false;
         }
     }
-    
+
     // SIDEBAR
     [RelayCommand]
     private void ToggleSidebar()
@@ -100,7 +102,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void AddNewCollection()
     {
-        System.Diagnostics.Debug.WriteLine("New Collection Clicked!");
+        var newCollection = new CollectionViewModel();
+        Collections.Add(newCollection);
     }
     private string TryFormatJson (string json)
     {
@@ -115,7 +118,6 @@ public partial class MainViewModel : ObservableObject
             return json; // Retorna texto puro se não for JSON válido
         }
     }
-
     private async Task StartInternetCheckLoopAsync(CancellationToken cancellationToken)
     {
         // ping a cada 5 segundos
@@ -128,7 +130,6 @@ public partial class MainViewModel : ObservableObject
             IsOnline = await CheckInternetConnectionAsync();
         }
     }
-
     private async Task<bool> CheckInternetConnectionAsync()
     {
         try
