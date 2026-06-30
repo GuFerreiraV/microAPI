@@ -7,6 +7,7 @@
     xmlns:local="using:microAPI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:microAPI.ViewModels"
+    xmlns:i="clr-namespace:Optris.Icons.Avalonia;assembly=Optris.Icons.Avalonia" 
     Title="Micro API"
     Width="1000"
     Height="600"
@@ -49,16 +50,17 @@
                             <DataTemplate>
                                 <StackPanel Margin="0,4">
                                     <!--  Cabeçalho da coleção  -->
-                                    <Grid Margin="8,4" ColumnDefinitions="Auto, *, Auto">
+                                    <Grid Margin="8,4" ColumnDefinitions="Auto, *, Auto, Auto">
                                         <!--  Cabeçalho da coleção  -->
-                                        <Button Grid.Column="0"
-                                                    Command="{Binding ToggleExpandCommand}"
-                                                    Content="{Binding Arrow}"
-                                                    FontSize="10"
-                                                    Padding="4,2"
-                                                    Background="Transparent"
-                                                    BorderThickness="0" />                                               
-                                            
+                                        <Button
+                                            Grid.Column="0"
+                                            Padding="4,2"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Command="{Binding ToggleExpandCommand}"
+                                            Content="{Binding Arrow}"
+                                            FontSize="10" />
+
                                         <Panel
                                             Grid.Column="1"
                                             Margin="8,0"
@@ -79,14 +81,24 @@
                                                 PlaceholderText="Nova Coleção"
                                                 Text="{Binding Name}" />
                                         </Panel>
-                                        <!--  Botão + para adicionar requisição  -->
+                                        <!--  Botão para remover uma coleção  -->
                                         <Button
                                             Grid.Column="2"
+                                            Padding="0,2"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Command="{Binding RemoveCollectionCommand}"
+                                            i:Attached.Icon="fa-regular fa-trash-can"                                            
+                                             />
+                                        <!--  Botão + para adicionar requisição  -->
+                                        <Button
+                                            Grid.Column="3"
                                             Padding="6,2"
                                             Background="Transparent"
                                             BorderThickness="0"
                                             Command="{Binding AddRequestCommand}"
-                                            Content="+" />
+                                            i:Attached.Icon="fa-solid fa-plus"
+                                            />
                                     </Grid>
                                     <!--  2. Lista de Requisições da Coleção (Oculta se !IsExpanded)  -->
                                     <ItemsControl
@@ -105,11 +117,11 @@
                                                         ItemsSource="{Binding HttpMethods}"
                                                         SelectedItem="{Binding Method}" />
                                                     <Border
+                                                        Grid.Column="1"
                                                         Padding="4,1"
                                                         VerticalAlignment="Center"
                                                         Background="{Binding Method, Converter={StaticResource MethodToColorConverter}}"
                                                         CornerRadius="3"
-                                                        Grid.Column="1"
                                                         IsVisible="{Binding !IsEditingName}">
                                                         <TextBlock
                                                             FontSize="9"
@@ -134,7 +146,7 @@
                                                             IsVisible="{Binding IsEditingName}"
                                                             KeyDown="TextBox_KeyDown"
                                                             LostFocus="TextBox_LostFocus"
-                                                             PlaceholderText="Nova Requisição"
+                                                            PlaceholderText="Nova Requisição"
                                                             Text="{Binding Name}" />
                                                     </Panel>
                                                 </Grid>
@@ -195,19 +207,22 @@
                     Text="{Binding Url}" />
 
                 <Button
-                    Grid.Column="3"
-                    HorizontalAlignment="Stretch"
+                    Grid.Column="3"                    
+                    HorizontalAlignment="Stretch"                    
                     HorizontalContentAlignment="Center"
                     Command="{Binding ExecuteRequestCommand}"
+                    IsEnabled="{Binding !IsLoading}" 
+                    Background="#09bd4e"                                     
+                    Foreground="White" 
                     Content="Enviar"
-                    IsEnabled="{Binding !IsLoading}" />
+                    />
             </Grid>
 
             <!--  Request Body  -->
             <HeaderedContentControl
                 Grid.Row="1"
                 Margin="0,0,0,8"
-                Header="Request Body (JSON)">
+                Header="Request Body">
                 <TextBox
                     MinHeight="100"
                     VerticalContentAlignment="Top"

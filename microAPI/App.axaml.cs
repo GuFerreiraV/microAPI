@@ -1,4 +1,6 @@
 ﻿using Avalonia;
+using Optris.Icons.Avalonia;
+using Optris.Icons.Avalonia.FontAwesome;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Hosting;
@@ -20,6 +22,8 @@ namespace microAPI
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+            IconProvider.Current
+                .Register<FontAwesomeIconProvider>();
         }
 
         public override async void OnFrameworkInitializationCompleted()
